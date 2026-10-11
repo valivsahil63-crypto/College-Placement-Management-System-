@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title th:text="${company.name + ' - Profile'}">Company Details</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="mb-4">
+        <a th:href="@{/companies}" class="btn btn-outline-secondary btn-sm mb-2"><i class="bi bi-arrow-left"></i> Back to Companies</a>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="fw-bold text-dark mb-0" th:text="${company.name}">Company Name</h3>
+                <span class="text-muted" th:text="${company.industry + ' | ' + company.location}">Industry | Location</span>
+            </div>
+            <div sec:authorize="hasAnyRole('ADMIN', 'OFFICER')">
+                <a th:href="@{'/admin/companies/' + ${company.id} + '/edit'}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-pencil me-1"></i> Edit Profile
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header fw-bold">About the Organization</div>
+                <div class="card-body p-4">
+                    <p class="text-muted" th:text="${company.description}">Full company description and corporate background...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header fw-bold">Corporate Contact & HR Details</div>
+                <div class="card-body p-4 small">
+                    <p class="mb-2"><strong>HR Contact:</strong> <span th:text="${company.hrContactName}">Name</span></p>
+                    <p class="mb-2"><strong>HR Email:</strong> <a th:href="'mailto:' + ${company.hrContactEmail}" th:text="${company.hrContactEmail}">hr@company.com</a></p>
+                    <p class="mb-2"><strong>HR Phone:</strong> <span th:text="${company.hrContactPhone != null ? company.hrContactPhone : 'N/A'}">Phone</span></p>
+                    <p class="mb-2"><strong>Location:</strong> <span th:text="${company.location}">Location</span></p>
+                    <p class="mb-0" th:if="${company.website != null && !company.website.isBlank()}">
+                        <strong>Official Website:</strong> <br>
+                        <a th:href="${company.website}" target="_blank" th:text="${company.website}">Website</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

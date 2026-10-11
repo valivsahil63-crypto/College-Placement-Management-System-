@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title>Placement Drives - College Placement System</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Campus Placement Drives</h3>
+            <p class="text-muted small mb-0">Explore scheduled recruitment opportunities, check criteria, and apply.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <div sec:authorize="hasAnyRole('OFFICER', 'ADMIN')">
+                <a th:href="@{/drives/new}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i> New Placement Drive
+                </a>
+            </div>
+            <select class="form-select form-select-sm" style="width: auto;" onchange="location = this.value;">
+                <option th:value="@{/drives}" th:selected="${selectedStatus == null}">All Statuses</option>
+                <option value="/drives?status=PUBLISHED" th:selected="${selectedStatus != null && selectedStatus.name() == 'PUBLISHED'}">Open for Registration</option>
+                <option value="/drives?status=REGISTRATION_CLOSED" th:selected="${selectedStatus != null && selectedStatus.name() == 'REGISTRATION_CLOSED'}">Closed</option>
+                <option value="/drives?status=DRAFT" th:selected="${selectedStatus != null && selectedStatus.name() == 'DRAFT'}">Draft</option>
+                <option value="/drives?status=COMPLETED" th:selected="${selectedStatus != null && selectedStatus.name() == 'COMPLETED'}">Completed</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4" th:each="drive : ${drives}">
+            <div class="card h-100 shadow-sm border">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge" th:classappend="'bg-' + ${drive.status.badgeClass}" th:text="${drive.status.displayName}">Published</span>
+                        <span class="badge bg-success-subtle text-success fs-6 fw-bold" th:text="${drive.ctcSalary + ' LPA'}">12 LPA</span>
+                    </div>
+
+                    <h5 class="fw-bold text-dark mb-1" th:text="${drive.company.name}">Company Name</h5>
+                    <h6 class="text-primary fw-semibold mb-3" th:text="${drive.title}">Software Engineer</h6>
+
+                    <p class="text-muted small mb-3 flex-grow-1" th:text="${#strings.abbreviate(drive.description, 130)}">Description...</p>
+
+                    <div class="bg-light p-3 rounded small mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Eligible Branches:</span>
+                            <strong class="text-dark" th:text="${drive.requiredBranches}">CSE,ISE</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Min CGPA:</span>
+                            <strong class="text-dark" th:text="${drive.minCgpa}">7.5</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Max Backlogs:</span>
+                            <strong class="text-dark" th:text="${drive.maxActiveBacklogs}">0</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Closing Date:</span>
+                            <strong class="text-danger" th:text="${#temporals.format(drive.applicationClosingDate, 'dd MMM yyyy')}">Date</strong>
+                        </div>
+                    </div>
+
+                    <a th:href="@{'/drives/' + ${drive.id}}" class="btn btn-primary btn-sm w-100 fw-medium">
+                        View Details & Eligibility <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 text-center text-muted py-5" th:if="${drives == null || drives.isEmpty()}">
+            <i class="bi bi-briefcase fs-1 text-secondary mb-2 d-block"></i>
+            <h5>No placement drives found</h5>
+            <p class="small">Check back later or adjust status filters.</p>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

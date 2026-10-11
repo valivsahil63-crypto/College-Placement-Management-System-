@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title>Placement Reports & Analytics - College Placement System</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Campus Placement Analytics & Compliance Reports</h3>
+            <p class="text-muted small mb-0">Official statistical reports, accreditation data, compensation distributions, and CSV data exports.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/reports/export/students}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export Students Master (CSV)
+            </a>
+            <a th:href="@{/reports/export/placed}" class="btn btn-success btn-sm">
+                <i class="bi bi-download me-1"></i> Export Placed Students (CSV)
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <span class="text-muted small fw-semibold text-uppercase">Total Batch Size</span>
+                <h3 class="fw-bold text-dark mb-0" th:text="${stats.totalStudents}">0</h3>
+                <small class="text-muted">Registered eligible candidates</small>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <span class="text-muted small fw-semibold text-uppercase">Placed Students</span>
+                <h3 class="fw-bold text-success mb-0" th:text="${stats.placedStudents}">0</h3>
+                <small class="text-success" th:text="${stats.placementPercentage + '% batch placement'}">0%</small>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <span class="text-muted small fw-semibold text-uppercase">Average CTC</span>
+                <h3 class="fw-bold text-primary mb-0" th:text="${stats.averageCtc + ' LPA'}">0 LPA</h3>
+                <small class="text-muted">Mean corporate compensation</small>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <span class="text-muted small fw-semibold text-uppercase">Highest CTC</span>
+                <h3 class="fw-bold text-warning mb-0" th:text="${stats.highestCtc + ' LPA'}">0 LPA</h3>
+                <small class="text-muted">Top campus package</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Charts -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white fw-bold">
+                    <i class="bi bi-bar-chart-fill text-primary me-2"></i> Department-wise Placement Rate
+                </div>
+                <div class="card-body">
+                    <canvas id="reportDeptChart" height="130"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white fw-bold">
+                    <i class="bi bi-pie-chart-fill text-primary me-2"></i> Recruiter Share (Placed Candidates)
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <canvas id="reportCompanyChart" height="220"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Official Placement Records Table -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <span class="fw-bold"><i class="bi bi-award-fill text-warning me-2"></i> Placed Students Master Record</span>
+            <span class="badge bg-light text-dark border" th:text="${#lists.size(offers) + ' Offers Recorded'}">0 Offers</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 searchable-table">
+                <thead>
+                    <tr>
+                        <th>USN</th>
+                        <th>Student Name</th>
+                        <th>Department</th>
+                        <th>CGPA</th>
+                        <th>Recruiting Employer</th>
+                        <th>Designation</th>
+                        <th>Offered Package</th>
+                        <th>Offer Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="o : ${offers}">
+                        <td class="fw-bold" th:text="${o.student.usn}">1CS21CS089</td>
+                        <td class="fw-semibold text-dark" th:text="${o.student.user.fullName}">Sneha Rao</td>
+                        <td><span class="badge bg-light text-dark border" th:text="${o.student.branch}">CSE</span></td>
+                        <td class="fw-bold text-primary" th:text="${o.student.cgpa}">9.35</td>
+                        <td class="fw-bold" th:text="${o.company.name}">Google India</td>
+                        <td th:text="${o.designation}">SDE-1</td>
+                        <td><span class="badge bg-success-subtle text-success fs-6" th:text="${o.packageOffered + ' LPA'}">32.5 LPA</span></td>
+                        <td class="small text-muted" th:text="${o.offerDate}">2026-10-10</td>
+                    </tr>
+                    <tr th:if="${offers == null || offers.isEmpty()}">
+                        <td colspan="8" class="text-center text-muted py-4">No offers issued yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Chart.js Scripts -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const deptTotalData = /*[[${stats.departmentTotal}]]*/ {};
+        const deptPlacedData = /*[[${stats.departmentPlaced}]]*/ {};
+        const companySelectionsData = /*[[${stats.companySelections}]]*/ {};
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // 1. Department Chart
+            const deptLabels = Object.keys(deptTotalData);
+            const totalCounts = deptLabels.map(k => deptTotalData[k] || 0);
+            const placedCounts = deptLabels.map(k => deptPlacedData[k] || 0);
+
+            const deptCtx = document.getElementById('reportDeptChart');
+            if (deptCtx && deptLabels.length > 0) {
+                new Chart(deptCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: deptLabels,
+                        datasets: [
+                            {
+                                label: 'Enrolled Candidates',
+                                data: totalCounts,
+                                backgroundColor: '#cbd5e1'
+                            },
+                            {
+                                label: 'Placed Candidates',
+                                data: placedCounts,
+                                backgroundColor: '#2563eb'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                    }
+                });
+            }
+
+            // 2. Company Selections Doughnut
+            const compLabels = Object.keys(companySelectionsData);
+            const compCounts = Object.values(companySelectionsData);
+            const compCtx = document.getElementById('reportCompanyChart');
+            if (compCtx && compLabels.length > 0) {
+                new Chart(compCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: compLabels,
+                        datasets: [{
+                            data: compCounts,
+                            backgroundColor: ['#2563eb', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+        });
+        /*]]>*/
+    </script>
+
+</div>
+</body>
+</html>

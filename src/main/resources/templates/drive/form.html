@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title th:text="${isEdit ? 'Edit Placement Drive' : 'Create Placement Drive'}">Placement Drive</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="mb-4">
+        <a th:href="@{/drives}" class="btn btn-outline-secondary btn-sm mb-2"><i class="bi bi-arrow-left"></i> Back to Drives</a>
+        <h3 class="fw-bold text-dark mb-1" th:text="${isEdit ? 'Edit Campus Recruitment Drive' : 'Launch New Campus Recruitment Drive'}">Drive Form</h3>
+        <p class="text-muted small mb-0">Define job role criteria, eligibility thresholds, salary package, and application deadlines.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white fw-bold">
+                    <i class="bi bi-briefcase-fill text-primary me-2"></i> Placement Drive Specifications
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="${isEdit ? '/drives/' + driveDto.id + '/edit' : '/drives/new'}" th:object="${driveDto}" method="post">
+                        <input type="hidden" th:field="*{id}">
+
+                        <!-- Basic Information -->
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">1. Role & Company</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Job Title *</label>
+                                <input type="text" class="form-control" th:field="*{title}" placeholder="e.g. Software Development Engineer (SDE-1)" required>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Recruiting Company *</label>
+                                <select class="form-select" th:field="*{companyId}" required>
+                                    <option value="">Select Employer</option>
+                                    <option th:each="comp : ${companies}" th:value="${comp.id}" th:text="${comp.name}">Company</option>
+                                </select>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('companyId')}" th:errors="*{companyId}"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Job Location *</label>
+                                <input type="text" class="form-control" th:field="*{jobLocation}" placeholder="e.g. Bengaluru, Karnataka" required>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('jobLocation')}" th:errors="*{jobLocation}"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Job Type *</label>
+                                <select class="form-select" th:field="*{jobType}" required>
+                                    <option value="FULL_TIME">Full Time</option>
+                                    <option value="INTERNSHIP">Internship</option>
+                                    <option value="INTERN_PLUS_FULLTIME">Internship + Full Time PPO</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Salary / CTC Package (in LPA) *</label>
+                                <input type="number" step="0.01" class="form-control" th:field="*{ctcSalary}" placeholder="e.g. 14.5" required>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('ctcSalary')}" th:errors="*{ctcSalary}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Eligibility Thresholds -->
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">2. Eligibility Engine Criteria</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Eligible Branches (Comma-separated) *</label>
+                                <input type="text" class="form-control" th:field="*{requiredBranches}" placeholder="e.g. CSE,ISE,ECE" required>
+                                <small class="text-muted">Separate multiple branch codes with commas (e.g. CSE, ISE, ECE, MECH, CIVIL).</small>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('requiredBranches')}" th:errors="*{requiredBranches}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Eligible Graduation Batch (Year) *</label>
+                                <input type="number" class="form-control" th:field="*{eligibleGraduationYear}" placeholder="2025" required>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('eligibleGraduationYear')}" th:errors="*{eligibleGraduationYear}"></div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Minimum CGPA (0-10) *</label>
+                                <input type="number" step="0.01" class="form-control" th:field="*{minCgpa}" placeholder="7.50" min="0" max="10" required>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('minCgpa')}" th:errors="*{minCgpa}"></div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Min 10th Percentage (%) *</label>
+                                <input type="number" step="0.01" class="form-control" th:field="*{minTenthPercentage}" placeholder="70.0" min="0" max="100" required>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('minTenthPercentage')}" th:errors="*{minTenthPercentage}"></div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Min 12th Percentage (%) *</label>
+                                <input type="number" step="0.01" class="form-control" th:field="*{minTwelfthPercentage}" placeholder="70.0" min="0" max="100" required>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('minTwelfthPercentage')}" th:errors="*{minTwelfthPercentage}"></div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Max Active Backlogs Allowed *</label>
+                                <input type="number" class="form-control" th:field="*{maxActiveBacklogs}" placeholder="0" min="0" required>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('maxActiveBacklogs')}" th:errors="*{maxActiveBacklogs}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Schedule & Deadlines -->
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">3. Application Window & Pipeline</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Application Opening Date *</label>
+                                <input type="datetime-local" class="form-control" th:field="*{applicationOpeningDate}" required>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('applicationOpeningDate')}" th:errors="*{applicationOpeningDate}"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Application Closing Date *</label>
+                                <input type="datetime-local" class="form-control" th:field="*{applicationClosingDate}" required>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('applicationClosingDate')}" th:errors="*{applicationClosingDate}"></div>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-semibold">Vacancies Count *</label>
+                                <input type="number" class="form-control" th:field="*{vacancies}" min="1" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-semibold">Drive Status *</label>
+                                <select class="form-select" th:field="*{status}" required>
+                                    <option value="DRAFT">Draft</option>
+                                    <option value="PUBLISHED">Published</option>
+                                    <option value="REGISTRATION_CLOSED">Closed</option>
+                                    <option value="COMPLETED">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Role Details & Selection Process -->
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">4. Job Description & Selection Process</h6>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Required Technical Skills</label>
+                            <input type="text" class="form-control" th:field="*{requiredSkills}" placeholder="e.g. Java, Python, Spring Boot, MySQL, REST APIs, System Design">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Job Description</label>
+                            <textarea class="form-control" th:field="*{description}" rows="4" placeholder="Detailed role description, responsibilities, department, etc."></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold">Selection Rounds & Process</label>
+                            <textarea class="form-control" th:field="*{selectionProcess}" rows="3" placeholder="e.g. 1. Online Coding Round, 2. Technical Interview, 3. HR Round"></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/drives}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4 fw-semibold" th:text="${isEdit ? 'Update Placement Drive' : 'Publish Placement Drive'}">
+                                Save Drive
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title>Audit Logs - College Placement System</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Administrative Audit Trail</h3>
+            <p class="text-muted small mb-0">Record of user logins, drive creations, status modifications, and system events.</p>
+        </div>
+        <span class="badge bg-secondary px-3 py-2">Compliance & Security</span>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Action</th>
+                        <th>Entity</th>
+                        <th>Details</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="log : ${logs}">
+                        <td class="small text-muted" th:text="${#temporals.format(log.timestamp, 'yyyy-MM-dd HH:mm:ss')}">2026-10-11 12:00:00</td>
+                        <td class="fw-semibold text-dark" th:text="${log.username}">user@college.edu</td>
+                        <td><span class="badge bg-light text-dark border" th:text="${log.role}">ROLE_ADMIN</span></td>
+                        <td><span class="badge bg-primary-subtle text-primary" th:text="${log.action}">CREATE_DRIVE</span></td>
+                        <td class="small" th:text="${log.entityName + ' #' + log.entityId}">Drive #1</td>
+                        <td class="small text-muted" th:text="${log.details}">Details</td>
+                        <td class="small text-muted" th:text="${log.ipAddress}">127.0.0.1</td>
+                    </tr>
+                    <tr th:if="${logs == null || logs.isEmpty()}">
+                        <td colspan="7" class="text-center text-muted py-4">No audit logs recorded yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

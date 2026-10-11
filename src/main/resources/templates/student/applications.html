@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title>My Applications - College Placement System</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">My Placement Applications</h3>
+            <p class="text-muted small mb-0">Track your recruitment pipeline, review officer feedback, and view status history.</p>
+        </div>
+        <a th:href="@{/drives}" class="btn btn-primary btn-sm">
+            <i class="bi bi-search me-1"></i> Explore More Drives
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Company & Role</th>
+                        <th>Salary (CTC)</th>
+                        <th>Applied On</th>
+                        <th>Stage / Lifecycle Status</th>
+                        <th>Officer Feedback</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="app : ${applications}">
+                        <td>
+                            <div class="fw-bold text-dark" th:text="${app.drive.company.name}">Google India</div>
+                            <span class="text-primary small" th:text="${app.drive.title}">SDE-1</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-success-subtle text-success fs-6" th:text="${app.drive.ctcSalary + ' LPA'}">32.5 LPA</span>
+                        </td>
+                        <td class="small text-muted" th:text="${#temporals.format(app.appliedAt, 'dd MMM yyyy, HH:mm')}">Date</td>
+                        <td>
+                            <span class="badge" th:classappend="'bg-' + ${app.currentStatus.badgeClass}" th:text="${app.currentStatus.displayName}">Applied</span>
+                        </td>
+                        <td>
+                            <span class="small text-secondary" th:text="${app.remarks != null && !app.remarks.isBlank() ? app.remarks : 'No officer notes yet'}">Notes</span>
+                        </td>
+                        <td class="text-end">
+                            <!-- Withdrawal logic: permitted only in APPLIED or UNDER_REVIEW stage -->
+                            <div th:if="${app.currentStatus.name() == 'APPLIED' || app.currentStatus.name() == 'UNDER_REVIEW'}">
+                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                        th:onclick="'openWithdrawModal(' + ${app.id} + ', \'' + ${#strings.escapeJavaScript(app.drive.company.name)} + '\')'">
+                                    <i class="bi bi-x-circle me-1"></i> Withdraw
+                                </button>
+                            </div>
+                            <div th:unless="${app.currentStatus.name() == 'APPLIED' || app.currentStatus.name() == 'UNDER_REVIEW'}">
+                                <button class="btn btn-sm btn-light border text-muted" disabled title="Withdrawal is not permitted once shortlisted or scheduled for interviews">
+                                    Locked
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${applications == null || applications.isEmpty()}">
+                        <td colspan="6" class="text-center text-muted py-5">
+                            <i class="bi bi-file-earmark-text fs-1 text-secondary d-block mb-2"></i>
+                            <h6>No applications submitted yet</h6>
+                            <p class="small mb-3">Check active drives and submit your first application!</p>
+                            <a th:href="@{/drives}" class="btn btn-primary btn-sm">Browse Placement Drives</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Application Withdrawal Modal -->
+    <div class="modal fade" id="withdrawModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="withdrawForm" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold text-danger">Withdraw Placement Application</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="small text-muted">
+                            Are you sure you want to withdraw your application for <strong id="withdrawCompanyName">Company</strong>?
+                            This action cannot be undone and you will not be able to reapply for this drive.
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Reason for Withdrawal</label>
+                            <textarea class="form-control" name="reason" rows="2" placeholder="e.g. Accepted another offer / Schedule conflict" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger btn-sm fw-semibold">Confirm Withdrawal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openWithdrawModal(appId, companyName) {
+            document.getElementById('withdrawCompanyName').textContent = companyName;
+            document.getElementById('withdrawForm').action = '/applications/' + appId + '/withdraw';
+            const modal = new bootstrap.Modal(document.getElementById('withdrawModal'));
+            modal.show();
+        }
+    </script>
+
+</div>
+</body>
+</html>

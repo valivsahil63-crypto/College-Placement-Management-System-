@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title>Application Management - College Placement System</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Candidate Applications Review</h3>
+            <p class="text-muted small mb-0">Track application stages, promote shortlisted candidates, schedule interviews, and update selection results.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <select class="form-select form-select-sm" onchange="location = this.value;">
+                <option th:value="@{/officer/applications}" th:selected="${selectedStatus == null}">All Statuses</option>
+                <option th:each="st : ${statuses}" th:value="@{'/officer/applications?status=' + ${st}}"
+                        th:text="${st.displayName}" th:selected="${selectedStatus == st}">Status</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 searchable-table">
+                <thead>
+                    <tr>
+                        <th>Candidate</th>
+                        <th>Drive & Company</th>
+                        <th>Applied On</th>
+                        <th>Academic Record</th>
+                        <th>Resume</th>
+                        <th>Stage</th>
+                        <th class="text-end">Lifecycle Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="app : ${applications}">
+                        <td>
+                            <div class="fw-bold" th:text="${app.student.user.fullName}">Student Name</div>
+                            <small class="text-muted" th:text="${app.student.usn + ' (' + app.student.branch + ')'}">1CS21CS045 (CSE)</small>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark" th:text="${app.drive.company.name}">Google India</div>
+                            <small class="text-primary" th:text="${app.drive.title}">SDE-1</small>
+                        </td>
+                        <td class="small text-muted" th:text="${#temporals.format(app.appliedAt, 'dd MMM yyyy, HH:mm')}">Date</td>
+                        <td>
+                            <span class="badge bg-light text-dark border" th:text="${'CGPA ' + app.student.cgpa}">8.5</span>
+                            <span class="badge" th:classappend="${app.student.activeBacklogs == 0} ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'"
+                                  th:text="${app.student.activeBacklogs + ' backlogs'}">0 backlogs</span>
+                        </td>
+                        <td>
+                            <a th:if="${app.student.resumePath != null}" th:href="@{'/uploads/resume/' + ${app.student.resumePath}}" target="_blank" class="btn btn-sm btn-outline-danger py-0 px-2">
+                                <i class="bi bi-file-earmark-pdf"></i> PDF
+                            </a>
+                            <span th:unless="${app.student.resumePath != null}" class="text-muted small">None</span>
+                        </td>
+                        <td>
+                            <span class="badge" th:classappend="'bg-' + ${app.currentStatus.badgeClass}" th:text="${app.currentStatus.displayName}">Applied</span>
+                            <div th:if="${app.remarks != null && !app.remarks.isBlank()}" class="small text-muted text-truncate" style="max-width: 150px;" th:title="${app.remarks}" th:text="${app.remarks}">Remarks</div>
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-primary"
+                                        th:onclick="'openStatusModal(' + ${app.id} + ', \'' + ${app.currentStatus} + '\', \'' + ${#strings.escapeJavaScript(app.student.user.fullName)} + '\')'">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Update Stage
+                                </button>
+                                <a th:href="@{'/officer/interviews?appId=' + ${app.id}}" class="btn btn-outline-success" title="Schedule Interview">
+                                    <i class="bi bi-calendar-plus"></i>
+                                </a>
+                                <a th:if="${app.currentStatus.name() == 'SELECTED' || app.currentStatus.name() == 'SHORTLISTED'}"
+                                   th:href="@{'/officer/offers/new?applicationId=' + ${app.id}}" class="btn btn-outline-warning" title="Issue Offer">
+                                    <i class="bi bi-award"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${applications == null || applications.isEmpty()}">
+                        <td colspan="7" class="text-center text-muted py-4">No candidate applications found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Status Update Modal -->
+    <div class="modal fade" id="statusModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/officer/applications/status}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="statusModalTitle">Update Application Lifecycle Stage</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="modalApplicationId" name="applicationId">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">New Application Status *</label>
+                            <select class="form-select" id="modalNewStatus" name="newStatus" required>
+                                <option value="APPLIED">Applied</option>
+                                <option value="UNDER_REVIEW">Under Review</option>
+                                <option value="SHORTLISTED">Shortlisted</option>
+                                <option value="INTERVIEW_SCHEDULED">Interview Scheduled</option>
+                                <option value="SELECTED">Selected / Offered</option>
+                                <option value="REJECTED">Rejected</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Feedback / Officer Remarks</label>
+                            <textarea class="form-control" name="remarks" id="modalRemarks" rows="3" placeholder="Reason, feedback, or stage notes for candidate..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm fw-semibold">Save Status Change</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openStatusModal(appId, currentStatus, studentName) {
+            document.getElementById('modalApplicationId').value = appId;
+            document.getElementById('modalNewStatus').value = currentStatus;
+            document.getElementById('statusModalTitle').textContent = 'Update Stage for ' + studentName;
+            const modal = new bootstrap.Modal(document.getElementById('statusModal'));
+            modal.show();
+        }
+    </script>
+
+</div>
+</body>
+</html>

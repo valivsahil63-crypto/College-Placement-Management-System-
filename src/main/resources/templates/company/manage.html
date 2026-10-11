@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title>Manage Companies - College Placement System</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Company Management</h3>
+            <p class="text-muted small mb-0">Register employers, update contact details, and toggle recruitment drive permissions.</p>
+        </div>
+        <a th:href="@{/admin/companies/new}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Register New Company
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 searchable-table">
+                <thead>
+                    <tr>
+                        <th>Company Name</th>
+                        <th>Industry Sector</th>
+                        <th>HR Contact Person</th>
+                        <th>Email & Phone</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="c : ${companies}">
+                        <td class="fw-bold text-dark" th:text="${c.name}">Google India</td>
+                        <td><span class="badge bg-light text-dark border" th:text="${c.industry}">Technology</span></td>
+                        <td th:text="${c.hrContactName}">HR Name</td>
+                        <td>
+                            <div class="small fw-semibold" th:text="${c.hrContactEmail}">hr@company.com</div>
+                            <small class="text-muted" th:text="${c.hrContactPhone != null ? c.hrContactPhone : 'N/A'}">Phone</small>
+                        </td>
+                        <td class="small" th:text="${c.location}">Location</td>
+                        <td>
+                            <span th:if="${c.active}" class="badge bg-success-subtle text-success">Active</span>
+                            <span th:unless="${c.active}" class="badge bg-secondary">Inactive</span>
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a th:href="@{'/companies/' + ${c.id}}" class="btn btn-light border" title="View Profile">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a th:href="@{'/admin/companies/' + ${c.id} + '/edit'}" class="btn btn-light border" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form th:action="@{'/admin/companies/' + ${c.id} + '/toggle'}" method="post" class="d-inline"
+                                      onsubmit="return confirm('Toggle active status for this recruiting partner?');">
+                                    <button type="submit" class="btn btn-light border" th:title="${c.active ? 'Deactivate Company' : 'Activate Company'}">
+                                        <i class="bi" th:classappend="${c.active ? 'bi-toggle-on text-success' : 'bi-toggle-off text-muted'}"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${companies == null || companies.isEmpty()}">
+                        <td colspan="7" class="text-center text-muted py-4">No companies registered yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

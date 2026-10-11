@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title>My Job Offers - College Placement System</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="mb-4">
+        <h3 class="fw-bold text-dark mb-1">Campus Placement Offers</h3>
+        <p class="text-muted small mb-0">Official recruitment letters, compensation packages, and formal response management.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6" th:each="offer : ${offers}">
+            <div class="card shadow-sm border border-success h-100">
+                <div class="card-header bg-success-subtle text-success d-flex justify-content-between align-items-center">
+                    <span class="fw-bold"><i class="bi bi-patch-check-fill me-2"></i> Official Job Offer</span>
+                    <span class="badge" th:classappend="'bg-' + ${offer.status.badgeClass}" th:text="${offer.status.displayName}">Accepted</span>
+                </div>
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h4 class="fw-bold text-dark mb-1" th:text="${offer.company.name}">Google India</h4>
+                            <h6 class="text-primary fw-semibold" th:text="${offer.designation}">SDE-1</h6>
+                        </div>
+                        <div class="text-end">
+                            <span class="text-muted small d-block">Compensation (CTC)</span>
+                            <span class="badge bg-success fs-5 px-3 py-2" th:text="${offer.packageOffered + ' LPA'}">32.5 LPA</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-light p-3 rounded small mb-3">
+                        <div class="mb-1"><strong>Offer Date:</strong> <span th:text="${offer.offerDate}">2026-10-10</span></div>
+                        <div class="mb-1"><strong>Tentative Joining Date:</strong> <span th:text="${offer.joiningDate != null ? offer.joiningDate : 'To be confirmed'}">Date</span></div>
+                        <div class="mb-0" th:if="${offer.offerDetails != null}">
+                            <strong>Details:</strong> <span th:text="${offer.offerDetails}">Terms</span>
+                        </div>
+                    </div>
+
+                    <!-- Action buttons if pending -->
+                    <div th:if="${offer.status.name() == 'PENDING'}" class="mt-auto d-flex gap-2">
+                        <form th:action="@{'/student/offers/' + ${offer.id} + '/respond'}" method="post" class="flex-grow-1"
+                              onsubmit="return confirm('Confirm acceptance of this job offer?');">
+                            <input type="hidden" name="status" value="ACCEPTED">
+                            <button type="submit" class="btn btn-success btn-sm w-100 fw-semibold">
+                                <i class="bi bi-check-circle me-1"></i> Accept Offer
+                            </button>
+                        </form>
+                        <form th:action="@{'/student/offers/' + ${offer.id} + '/respond'}" method="post" class="flex-grow-1"
+                              onsubmit="return confirm('Are you sure you want to decline this job offer?');">
+                            <input type="hidden" name="status" value="REJECTED">
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100 fw-semibold">
+                                <i class="bi bi-x-circle me-1"></i> Decline
+                            </button>
+                        </form>
+                    </div>
+
+                    <div th:unless="${offer.status.name() == 'PENDING'}" class="mt-auto">
+                        <span class="small text-muted">
+                            Offer response recorded as: <strong th:text="${offer.status.displayName}">Accepted</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 text-center text-muted py-5" th:if="${offers == null || offers.isEmpty()}">
+            <i class="bi bi-award fs-1 text-secondary d-block mb-2"></i>
+            <h5>No placement offers issued yet</h5>
+            <p class="small">When you are selected by a recruiting partner, your official offer letter and package details will be posted here.</p>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

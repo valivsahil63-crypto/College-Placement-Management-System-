@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title>Administrator Dashboard - College Placement System</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Administrative Placement Dashboard</h3>
+            <p class="text-muted small mb-0">Overview of campus recruitment metrics, student placements, and drives.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/reports/export/students}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-download me-1"></i> Export Students CSV
+            </a>
+            <a th:href="@{/drives/new}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle me-1"></i> New Placement Drive
+            </a>
+        </div>
+    </div>
+
+    <!-- Stat Cards Grid -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Total Students</span>
+                    <h3 class="fw-bold mb-0 text-dark" th:text="${stats.totalStudents}">0</h3>
+                    <small class="text-success"><i class="bi bi-check-circle"></i> Registered candidates</small>
+                </div>
+                <div class="stat-icon bg-primary-subtle text-primary">
+                    <i class="bi bi-mortarboard"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Partner Companies</span>
+                    <h3 class="fw-bold mb-0 text-dark" th:text="${stats.totalCompanies}">0</h3>
+                    <small class="text-primary"><i class="bi bi-building"></i> Active employers</small>
+                </div>
+                <div class="stat-icon bg-info-subtle text-info">
+                    <i class="bi bi-buildings"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Active Drives</span>
+                    <h3 class="fw-bold mb-0 text-dark" th:text="${stats.activeDrives}">0</h3>
+                    <small class="text-warning"><i class="bi bi-clock-history"></i> Open for applications</small>
+                </div>
+                <div class="stat-icon bg-warning-subtle text-warning">
+                    <i class="bi bi-briefcase"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Placement Rate</span>
+                    <h3 class="fw-bold mb-0 text-success" th:text="${stats.placementPercentage + '%'}">0%</h3>
+                    <small class="text-muted" th:text="${stats.placedStudents + ' placed students'}">0 placed</small>
+                </div>
+                <div class="stat-icon bg-success-subtle text-success">
+                    <i class="bi bi-trophy"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Metrics Row: Package Averages & Highs -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-xl-3">
+            <div class="card p-3 border-0 bg-white shadow-sm">
+                <span class="text-muted small">Highest Package Offered</span>
+                <h4 class="fw-bold text-primary mb-0" th:text="${stats.highestCtc + ' LPA'}">0 LPA</h4>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card p-3 border-0 bg-white shadow-sm">
+                <span class="text-muted small">Average Package Offered</span>
+                <h4 class="fw-bold text-info mb-0" th:text="${stats.averageCtc + ' LPA'}">0 LPA</h4>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card p-3 border-0 bg-white shadow-sm">
+                <span class="text-muted small">Total Applications Received</span>
+                <h4 class="fw-bold text-dark mb-0" th:text="${stats.totalApplications}">0</h4>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card p-3 border-0 bg-white shadow-sm">
+                <span class="text-muted small">Unique Placed Candidates</span>
+                <h4 class="fw-bold text-success mb-0" th:text="${stats.placedStudents}">0</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-dark"><i class="bi bi-bar-chart-fill text-primary me-2"></i> Department-wise Placement Statistics</span>
+                    <span class="badge bg-light text-muted">Real Database Aggregation</span>
+                </div>
+                <div class="card-body">
+                    <canvas id="deptPlacementChart" height="110"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header">
+                    <span class="fw-bold text-dark"><i class="bi bi-pie-chart-fill text-primary me-2"></i> Application Status Pipeline</span>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <canvas id="statusChart" height="220"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tables Row -->
+    <div class="row g-4">
+        <!-- Recent Placement Drives -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-dark"><i class="bi bi-briefcase-fill text-primary me-2"></i> Recent Placement Drives</span>
+                    <a th:href="@{/drives}" class="btn btn-outline-secondary btn-sm py-0">View All</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Company</th>
+                                <th>Role</th>
+                                <th>CTC</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="drive : ${recentDrives}">
+                                <td class="fw-semibold text-dark" th:text="${drive.company.name}">Google</td>
+                                <td th:text="${drive.title}">SDE-1</td>
+                                <td><span class="badge bg-success-subtle text-success" th:text="${drive.ctcSalary + ' LPA'}">32 LPA</span></td>
+                                <td>
+                                    <span class="badge" th:classappend="'bg-' + ${drive.status.badgeClass}" th:text="${drive.status.displayName}">Published</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{'/drives/' + ${drive.id}}" class="btn btn-sm btn-light border">Details</a>
+                                </td>
+                            </tr>
+                            <tr th:if="${recentDrives == null || recentDrives.isEmpty()}">
+                                <td colspan="5" class="text-center text-muted py-3">No placement drives found.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Registered Students -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-dark"><i class="bi bi-people-fill text-primary me-2"></i> Registered Students</span>
+                    <a th:href="@{/admin/students}" class="btn btn-outline-secondary btn-sm py-0">Manage</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Branch</th>
+                                <th>CGPA</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="s : ${recentStudents}">
+                                <td>
+                                    <div class="fw-semibold" th:text="${s.user.fullName}">Name</div>
+                                    <small class="text-muted" th:text="${s.usn}">1CS21CS001</small>
+                                </td>
+                                <td th:text="${s.branch}">CSE</td>
+                                <td class="fw-bold" th:text="${s.cgpa}">8.5</td>
+                                <td>
+                                    <span th:if="${s.placed}" class="badge bg-success">Placed</span>
+                                    <span th:unless="${s.placed}" class="badge bg-secondary">Unplaced</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Data Attributes for Chart.js Rendering -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const deptTotalData = /*[[${stats.departmentTotal}]]*/ {};
+        const deptPlacedData = /*[[${stats.departmentPlaced}]]*/ {};
+        const statusData = /*[[${stats.statusBreakdown}]]*/ {};
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // 1. Department Chart
+            const deptLabels = Object.keys(deptTotalData);
+            const totalCounts = deptLabels.map(k => deptTotalData[k] || 0);
+            const placedCounts = deptLabels.map(k => deptPlacedData[k] || 0);
+
+            const deptCtx = document.getElementById('deptPlacementChart');
+            if (deptCtx && deptLabels.length > 0) {
+                new Chart(deptCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: deptLabels,
+                        datasets: [
+                            {
+                                label: 'Total Registered',
+                                data: totalCounts,
+                                backgroundColor: '#94a3b8'
+                            },
+                            {
+                                label: 'Placed Students',
+                                data: placedCounts,
+                                backgroundColor: '#2563eb'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'top' } },
+                        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                    }
+                });
+            }
+
+            // 2. Status Breakdown Doughnut Chart
+            const statusLabels = Object.keys(statusData);
+            const statusCounts = Object.values(statusData);
+            const statusCtx = document.getElementById('statusChart');
+            if (statusCtx && statusLabels.length > 0) {
+                new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: statusLabels,
+                        datasets: [{
+                            data: statusCounts,
+                            backgroundColor: ['#3b82f6', '#06b6d4', '#f59e0b', '#8b5cf6', '#10b981', '#ef4444', '#6b7280']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+        });
+        /*]]>*/
+    </script>
+</div>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title>Student Management - College Placement System</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Student Database Management</h3>
+            <p class="text-muted small mb-0">Search, filter, inspect academic metrics, and manage student accounts.</p>
+        </div>
+        <a th:href="@{/reports/export/students}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export All to CSV
+        </a>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-3">
+            <form th:action="@{/admin/students}" method="get" class="row g-2 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" name="query" th:value="${query}" placeholder="Search by Student Name, USN, or Email...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="branch">
+                        <option value="ALL">All Departments</option>
+                        <option value="CSE" th:selected="${branch == 'CSE'}">Computer Science (CSE)</option>
+                        <option value="ISE" th:selected="${branch == 'ISE'}">Information Science (ISE)</option>
+                        <option value="ECE" th:selected="${branch == 'ECE'}">Electronics (ECE)</option>
+                        <option value="MECH" th:selected="${branch == 'MECH'}">Mechanical (MECH)</option>
+                        <option value="CIVIL" th:selected="${branch == 'CIVIL'}">Civil (CIVIL)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" name="gradYear" th:value="${gradYear}" placeholder="Batch (e.g. 2025)">
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 btn-sm">Filter</button>
+                    <a th:href="@{/admin/students}" class="btn btn-outline-secondary btn-sm" title="Reset Filters"><i class="bi bi-arrow-counterclockwise"></i></a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Students Table -->
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 searchable-table">
+                <thead>
+                    <tr>
+                        <th>USN</th>
+                        <th>Student Name & Email</th>
+                        <th>Branch</th>
+                        <th>CGPA</th>
+                        <th>10th / 12th %</th>
+                        <th>Backlogs</th>
+                        <th>Placement</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="s : ${students}">
+                        <td class="fw-semibold text-dark" th:text="${s.usn}">1CS21CS045</td>
+                        <td>
+                            <div class="fw-bold" th:text="${s.user.fullName}">Rahul Sharma</div>
+                            <small class="text-muted" th:text="${s.user.username}">rahul@college.edu</small>
+                        </td>
+                        <td><span class="badge bg-light text-dark border" th:text="${s.branch}">CSE</span></td>
+                        <td class="fw-bold text-primary" th:text="${s.cgpa}">8.85</td>
+                        <td class="small" th:text="${s.tenthPercentage + '% / ' + s.twelfthPercentage + '%'}">90% / 88%</td>
+                        <td>
+                            <span class="badge" th:classappend="${s.activeBacklogs == 0} ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'" th:text="${s.activeBacklogs}">0</span>
+                        </td>
+                        <td>
+                            <span th:if="${s.placed}" class="badge bg-success">Placed</span>
+                            <span th:unless="${s.placed}" class="badge bg-secondary">Unplaced</span>
+                        </td>
+                        <td>
+                            <span th:if="${s.user.enabled}" class="badge bg-success-subtle text-success">Active</span>
+                            <span th:unless="${s.user.enabled}" class="badge bg-danger-subtle text-danger">Deactivated</span>
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a th:href="@{'/admin/students/' + ${s.id}}" class="btn btn-light border" title="View Profile">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <form th:action="@{'/admin/students/' + ${s.id} + '/toggle-status'}" method="post" class="d-inline"
+                                      onsubmit="return confirm('Are you sure you want to toggle account status for this student?');">
+                                    <button type="submit" class="btn btn-light border" th:title="${s.user.enabled ? 'Deactivate Account' : 'Activate Account'}">
+                                        <i class="bi" th:classappend="${s.user.enabled ? 'bi-person-dash text-danger' : 'bi-person-check text-success'}"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${students == null || students.isEmpty()}">
+                        <td colspan="9" class="text-center text-muted py-4">No student records matching criteria found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

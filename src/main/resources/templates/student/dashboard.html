@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title>Student Dashboard - College Placement System</title>
+</head>
+<body>
+<div id="content">
+
+    <!-- Welcome Greeting Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                Welcome back, <span th:text="${student.user.fullName}">Student Name</span>!
+            </h3>
+            <p class="text-muted small mb-0" th:text="${student.branch + ' Department | USN: ' + student.usn}">CSE | 1CS21CS045</p>
+        </div>
+        <div>
+            <span th:if="${student.placed}" class="badge bg-success fs-6 px-3 py-2">
+                <i class="bi bi-patch-check-fill me-1"></i> Placed Student
+            </span>
+            <span th:unless="${student.placed}" class="badge bg-primary-subtle text-primary border border-primary-subtle fs-6 px-3 py-2">
+                <i class="bi bi-clock-history me-1"></i> In Placement Process
+            </span>
+        </div>
+    </div>
+
+    <!-- Resume Missing Warning Banner -->
+    <div th:if="${student.resumePath == null}" class="alert alert-warning d-flex align-items-center justify-content-between p-3 rounded-3 shadow-sm border-0 mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <i class="bi bi-exclamation-triangle-fill fs-3 text-warning"></i>
+            <div>
+                <h6 class="fw-bold mb-0">Resume PDF Not Uploaded Yet</h6>
+                <small class="text-muted">You cannot submit applications for campus drives until your PDF resume is uploaded.</small>
+            </div>
+        </div>
+        <a th:href="@{/student/profile}" class="btn btn-warning btn-sm fw-semibold">
+            Upload Resume Now
+        </a>
+    </div>
+
+    <!-- Student Academic Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <span class="text-muted small fw-semibold text-uppercase">Cumulative CGPA</span>
+                <h3 class="fw-bold text-primary mb-0" th:text="${student.cgpa}">8.85</h3>
+                <small class="text-muted">Scale of 10.0</small>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <span class="text-muted small fw-semibold text-uppercase">Active Backlogs</span>
+                <h3 class="fw-bold mb-0" th:classappend="${student.activeBacklogs == 0} ? 'text-success' : 'text-danger'" th:text="${student.activeBacklogs}">0</h3>
+                <small class="text-muted" th:text="${student.activeBacklogs == 0 ? 'Clear record' : 'Pending subjects'}">Status</small>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <span class="text-muted small fw-semibold text-uppercase">Applied Drives</span>
+                <h3 class="fw-bold text-dark mb-0" th:text="${#lists.size(applications)}">0</h3>
+                <small class="text-info"><i class="bi bi-send-check"></i> Submissions</small>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <span class="text-muted small fw-semibold text-uppercase">Offers Received</span>
+                <h3 class="fw-bold text-success mb-0" th:text="${#lists.size(offers)}">0</h3>
+                <small class="text-success"><i class="bi bi-award"></i> Job opportunities</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Upcoming Interviews for Student -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-dark"><i class="bi bi-calendar-event text-primary me-2"></i> Upcoming Interviews</span>
+                    <a th:href="@{/student/interviews}" class="btn btn-outline-secondary btn-sm py-0">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush" th:if="${upcomingInterviews != null && !upcomingInterviews.isEmpty()}">
+                        <li class="list-group-item p-3" th:each="inv : ${upcomingInterviews}">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h6 class="fw-bold text-dark mb-0" th:text="${inv.application.drive.company.name}">Microsoft</h6>
+                                <span class="badge" th:classappend="'bg-' + ${inv.status.badgeClass}" th:text="${inv.status.displayName}">Scheduled</span>
+                            </div>
+                            <p class="text-primary small mb-1 fw-semibold" th:text="${inv.roundName}">Round 1 - Technical</p>
+                            <div class="small text-muted mb-2">
+                                <i class="bi bi-clock me-1"></i> <span th:text="${#temporals.format(inv.interviewDate, 'dd MMM yyyy, hh:mm a')}">Date</span>
+                                <span class="ms-2"><i class="bi bi-geo-alt me-1"></i> <span th:text="${inv.mode.displayName}">Online</span></span>
+                            </div>
+                            <div class="bg-light p-2 rounded small" th:if="${inv.meetingLinkOrVenue != null}">
+                                <strong>Venue / Link:</strong> <span th:text="${inv.meetingLinkOrVenue}">Link</span>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="p-4 text-center text-muted" th:if="${upcomingInterviews == null || upcomingInterviews.isEmpty()}">
+                        <i class="bi bi-calendar-x fs-2 text-secondary d-block mb-2"></i>
+                        <span class="small">No upcoming interviews scheduled right now.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Application Activity -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-dark"><i class="bi bi-send-check text-primary me-2"></i> My Applications</span>
+                    <a th:href="@{/student/applications}" class="btn btn-outline-secondary btn-sm py-0">View All</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Drive</th>
+                                <th>Package</th>
+                                <th>Status</th>
+                                <th>Applied Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="app : ${applications}">
+                                <td>
+                                    <div class="fw-bold text-dark" th:text="${app.drive.company.name}">Google</div>
+                                    <small class="text-muted" th:text="${app.drive.title}">SDE-1</small>
+                                </td>
+                                <td><span class="badge bg-success-subtle text-success" th:text="${app.drive.ctcSalary + ' LPA'}">32 LPA</span></td>
+                                <td>
+                                    <span class="badge" th:classappend="'bg-' + ${app.currentStatus.badgeClass}" th:text="${app.currentStatus.displayName}">Applied</span>
+                                </td>
+                                <td class="small text-muted" th:text="${#temporals.format(app.appliedAt, 'dd MMM yyyy')}">Date</td>
+                            </tr>
+                            <tr th:if="${applications == null || applications.isEmpty()}">
+                                <td colspan="4" class="text-center text-muted py-4">You have not applied for any placement drives yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

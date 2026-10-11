@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - College Placement Management System</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" th:href="@{/}">
+                <i class="bi bi-mortarboard-fill text-primary fs-4"></i>
+                <span>College Placement Portal</span>
+            </a>
+            <div class="ms-auto d-flex gap-2">
+                <a th:href="@{/}" class="btn btn-outline-light btn-sm">Home</a>
+                <a th:href="@{/login}" class="btn btn-primary btn-sm">Sign In</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <div class="container py-5" style="max-width: 860px;">
+        <div class="card shadow-sm border-0 rounded-3 p-4 p-md-5 bg-white">
+            <h2 class="fw-bold text-dark mb-2">Privacy Policy</h2>
+            <p class="text-muted small border-bottom pb-3 mb-4">Last Updated: October 2026 | College Placement and Training Cell</p>
+
+            <h5 class="fw-bold text-primary mb-2">1. Introduction</h5>
+            <p class="text-secondary small mb-4">
+                The College Placement Management System is dedicated to maintaining the confidentiality and integrity of personal and academic data entrusted to us by students, faculty, and corporate recruitment partners. This Privacy Policy outlines the categories of data we collect, our processing objectives, and data protection measures.
+            </p>
+
+            <h5 class="fw-bold text-primary mb-2">2. Information We Collect</h5>
+            <p class="text-secondary small mb-2">To facilitate automated recruitment eligibility and interview coordination, we collect the following records:</p>
+            <ul class="text-secondary small mb-4">
+                <li><strong>Identity Information:</strong> Full legal name, official student roll number (USN), and institutional email address.</li>
+                <li><strong>Academic Credentials:</strong> Cumulative Grade Point Average (CGPA), 10th and 12th standard percentage marks, graduation batch year, and active backlogs.</li>
+                <li><strong>Curriculum Vitae:</strong> Student-uploaded PDF resumes containing project histories, technical capabilities, and verified contact phone numbers.</li>
+                <li><strong>System Logs:</strong> IP address, authentication timestamps, and administrative audit traces for security compliance.</li>
+            </ul>
+
+            <h5 class="fw-bold text-primary mb-2">3. Purpose and Legal Basis of Processing</h5>
+            <p class="text-secondary small mb-2">Student records are processed exclusively for recruitment purposes:</p>
+            <ul class="text-secondary small mb-4">
+                <li>Automated verification of academic eligibility against corporate hiring cutoffs.</li>
+                <li>Transmittal of candidate dossiers to prospective hiring organizations for registered campus drives.</li>
+                <li>Coordination of virtual or on-campus interview schedules.</li>
+                <li>Compilation of institutional accreditation metrics and department-wise placement statistics.</li>
+            </ul>
+
+            <h5 class="fw-bold text-primary mb-2">4. Data Access and Security</h5>
+            <p class="text-secondary small mb-4">
+                Access to student resumes and academic records is governed by role-based access control (RBAC). Only authenticated placement officers, system administrators, and verified recruiters have authorized access. Sensitive data fields and passwords are cryptographic hashes using industry-standard BCrypt encoders.
+            </p>
+
+            <h5 class="fw-bold text-primary mb-2">5. Data Retention and Deletion</h5>
+            <p class="text-secondary small mb-4">
+                Academic data is retained throughout the student enrollment lifecycle and following graduation for institutional accreditation audit requirements, in compliance with academic record retention policies.
+            </p>
+
+            <h5 class="fw-bold text-primary mb-2">6. Inquiries and Contact Information</h5>
+            <p class="text-secondary small mb-0">
+                For questions regarding student profile records or data privacy inquiries, contact the Placement and Training Cell at <code>placement-cell@college.edu</code>.
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center small text-secondary">
+            <p class="mb-1">&copy; 2026 College Placement Management System. All rights reserved.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a th:href="@{/privacy-policy}" class="text-secondary text-decoration-none">Privacy Policy</a>
+                <span>|</span>
+                <a th:href="@{/terms-and-conditions}" class="text-secondary text-decoration-none">Terms and Conditions</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

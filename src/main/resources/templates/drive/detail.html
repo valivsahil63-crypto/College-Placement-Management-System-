@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title th:text="${drive.company.name + ' - ' + drive.title}">Drive Details</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="mb-4">
+        <a th:href="@{/drives}" class="btn btn-outline-secondary btn-sm mb-2"><i class="bi bi-arrow-left"></i> Back to Drives</a>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="badge mb-2" th:classappend="'bg-' + ${drive.status.badgeClass}" th:text="${drive.status.displayName}">Published</span>
+                <h3 class="fw-bold text-dark mb-0" th:text="${drive.title}">Job Title</h3>
+                <span class="text-muted" th:text="${drive.company.name + ' | ' + drive.jobLocation}">Company | Location</span>
+            </div>
+            <!-- Officer / Admin Drive Controls -->
+            <div sec:authorize="hasAnyRole('OFFICER', 'ADMIN')" class="d-flex gap-2">
+                <a th:href="@{'/officer/drives/' + ${drive.id} + '/applications'}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-people me-1"></i> View Applicants
+                </a>
+                <a th:href="@{'/drives/' + ${drive.id} + '/edit'}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-pencil me-1"></i> Edit Drive
+                </a>
+                <form th:action="@{'/drives/' + ${drive.id} + '/status'}" method="post" class="d-inline">
+                    <select name="status" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+                        <option value="DRAFT" th:selected="${drive.status.name() == 'DRAFT'}">Draft</option>
+                        <option value="PUBLISHED" th:selected="${drive.status.name() == 'PUBLISHED'}">Published</option>
+                        <option value="REGISTRATION_CLOSED" th:selected="${drive.status.name() == 'REGISTRATION_CLOSED'}">Closed</option>
+                        <option value="COMPLETED" th:selected="${drive.status.name() == 'COMPLETED'}">Completed</option>
+                        <option value="CANCELLED" th:selected="${drive.status.name() == 'CANCELLED'}">Cancelled</option>
+                    </select>
+                </form>
+                <form sec:authorize="hasRole('ADMIN')" th:action="@{'/drives/' + ${drive.id} + '/delete'}" method="post" class="d-inline"
+                      onsubmit="return confirm('Are you sure you want to permanently delete this placement drive?');">
+                    <button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Eligibility Decision Banner (If Student Logged In) -->
+    <div sec:authorize="hasRole('STUDENT')" class="mb-4" th:if="${eligibility != null}">
+        <!-- Case 1: Already Applied -->
+        <div th:if="${eligibility.alreadyApplied}" class="alert alert-primary d-flex align-items-center justify-content-between p-3 rounded-3 shadow-sm border-0">
+            <div>
+                <h5 class="fw-bold mb-1"><i class="bi bi-check-circle-fill me-2"></i> Application Submitted</h5>
+                <p class="mb-0 small">You have already submitted your application for this recruitment drive.</p>
+            </div>
+            <a th:href="@{/student/applications}" class="btn btn-primary btn-sm fw-medium">
+                Track Application Status <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <!-- Case 2: Eligible to Apply -->
+        <div th:if="${eligibility.eligible && !eligibility.alreadyApplied}" class="card border-success shadow-sm mb-3">
+            <div class="card-header bg-success-subtle text-success fw-bold d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-shield-check me-2"></i> You Are Eligible to Apply!</span>
+                <span class="badge bg-success">Meets All Criteria</span>
+            </div>
+            <div class="card-body p-4">
+                <p class="text-muted small mb-3">
+                    Your academic profile satisfies all criteria defined by <strong th:text="${drive.company.name}">Company</strong>.
+                </p>
+
+                <!-- Criteria Satisfaction List -->
+                <div class="row g-2 mb-4">
+                    <div class="col-md-6" th:each="rule : ${eligibility.satisfiedCriteria}">
+                        <div class="small text-success d-flex align-items-center gap-2">
+                            <i class="bi bi-check2-circle fs-6"></i>
+                            <span th:text="${rule}">Rule satisfied</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Missing Resume Alert -->
+                <div th:if="${!eligibility.resumeUploaded}" class="alert alert-warning small mb-3">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    <strong>Resume Missing:</strong> You must upload your PDF resume in your
+                    <a th:href="@{/student/profile}" class="alert-link">Student Academic Profile</a> before submitting your application.
+                </div>
+
+                <!-- Application Submission Form -->
+                <form th:if="${eligibility.resumeUploaded}" th:action="@{'/applications/apply/' + ${drive.id}}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Candidate Application Remarks (Optional)</label>
+                        <textarea class="form-control" name="remarks" rows="2" placeholder="Brief statement of interest or relevant project highlights..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success fw-semibold px-4">
+                        <i class="bi bi-send-fill me-1"></i> Submit Application for Drive
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Case 3: Not Eligible -->
+        <div th:if="${!eligibility.eligible && !eligibility.alreadyApplied && eligibility.statusType.name() == 'NOT_ELIGIBLE'}" class="card border-danger shadow-sm mb-3">
+            <div class="card-header bg-danger-subtle text-danger fw-bold d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-x-circle-fill me-2"></i> Not Eligible for this Placement Drive</span>
+                <span class="badge bg-danger">Ineligible</span>
+            </div>
+            <div class="card-body p-4">
+                <p class="text-dark small fw-semibold mb-2">You do not meet the minimum criteria required for this drive for the following reason(s):</p>
+                <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item text-danger small px-0" th:each="reason : ${eligibility.failedCriteria}">
+                        <i class="bi bi-dash-circle me-2"></i> <span th:text="${reason}">Failed reason</span>
+                    </li>
+                </ul>
+
+                <div class="bg-light p-3 rounded small">
+                    <h6 class="fw-bold mb-2">Criteria Comparison Summary</h6>
+                    <div class="row g-2">
+                        <div class="col-sm-6">
+                            <span>Your CGPA: <strong><span th:text="${eligibility.studentCgpa}">0.0</span></strong> (Required: &ge; <span th:text="${eligibility.minCgpa}">0.0</span>)</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span>Your Active Backlogs: <strong><span th:text="${eligibility.studentBacklogs}">0</span></strong> (Allowed: &le; <span th:text="${eligibility.maxBacklogs}">0</span>)</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span>Your Branch: <strong><span th:text="${eligibility.studentBranch}">CSE</span></strong> (Allowed: <span th:text="${eligibility.allowedBranches}">CSE</span>)</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span>Your Batch: <strong><span th:text="${eligibility.studentGradYear}">2025</span></strong> (Required: <span th:text="${eligibility.eligibleGradYear}">2025</span>)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Case 4: Closed / Not Yet Open -->
+        <div th:if="${eligibility.statusType.name() == 'APPLICATION_CLOSED' || eligibility.statusType.name() == 'NOT_YET_OPEN'}" class="alert alert-warning p-3 rounded-3 shadow-sm border-0">
+            <h5 class="fw-bold mb-1"><i class="bi bi-clock-history me-2"></i> <span th:text="${eligibility.statusType.label}">Status</span></h5>
+            <p class="mb-0 small" th:each="reason : ${eligibility.failedCriteria}" th:text="${reason}">Timing reason</p>
+        </div>
+    </div>
+
+    <!-- Drive Information Breakdown -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header fw-bold">Job Role & Responsibilities</div>
+                <div class="card-body p-4">
+                    <p class="text-dark" th:text="${drive.description}">Description...</p>
+
+                    <h6 class="fw-bold mt-4 mb-2">Required Technical Skills</h6>
+                    <p class="text-muted" th:text="${drive.requiredSkills != null && !drive.requiredSkills.isBlank() ? drive.requiredSkills : 'Not specified'}">Skills</p>
+
+                    <h6 class="fw-bold mt-4 mb-2">Recruitment & Selection Process</h6>
+                    <div class="bg-light p-3 rounded small text-secondary" style="white-space: pre-line;" th:text="${drive.selectionProcess}">
+                        1. Online Assessment
+                        2. Technical Interview
+                        3. HR Interview
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header fw-bold">Drive Overview & Criteria</div>
+                <div class="card-body p-4 small">
+                    <div class="mb-3">
+                        <span class="text-muted d-block">Annual Package (CTC):</span>
+                        <h4 class="fw-bold text-success mb-0" th:text="${drive.ctcSalary + ' LPA'}">32.5 LPA</h4>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Job Type:</strong> <span th:text="${drive.jobType.displayName}">Full Time</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Vacancies:</strong> <span th:text="${drive.vacancies}">8</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Eligible Branches:</strong> <span class="badge bg-light text-dark border" th:text="${drive.requiredBranches}">CSE,ISE</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Minimum CGPA:</strong> <span th:text="${drive.minCgpa}">8.0</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>10th / 12th Cutoff:</strong> <span th:text="${drive.minTenthPercentage + '% / ' + drive.minTwelfthPercentage + '%'}">80% / 80%</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Max Backlogs Allowed:</strong> <span th:text="${drive.maxActiveBacklogs}">0</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Graduation Batch:</strong> <span th:text="${'Class of ' + drive.eligibleGraduationYear}">2025</span>
+                    </div>
+                    <hr>
+                    <div class="mb-2">
+                        <strong>Opening Date:</strong> <span th:text="${#temporals.format(drive.applicationOpeningDate, 'dd MMM yyyy, HH:mm')}">Date</span>
+                    </div>
+                    <div class="mb-0">
+                        <strong>Closing Date:</strong> <span class="text-danger fw-semibold" th:text="${#temporals.format(drive.applicationClosingDate, 'dd MMM yyyy, HH:mm')}">Date</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header fw-bold">Recruiting Employer</div>
+                <div class="card-body p-4 small">
+                    <h6 class="fw-bold text-dark mb-1" th:text="${drive.company.name}">Company</h6>
+                    <p class="text-muted mb-2" th:text="${drive.company.industry}">Sector</p>
+                    <p class="mb-0"><a th:href="@{'/companies/' + ${drive.company.id}}" class="btn btn-outline-primary btn-sm w-100">View Company Directory Profile</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

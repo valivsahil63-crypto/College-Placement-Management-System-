@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title>Issue Placement Offer - College Placement System</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="mb-4">
+        <a th:href="@{/officer/applications}" class="btn btn-outline-secondary btn-sm mb-2"><i class="bi bi-arrow-left"></i> Back to Applications</a>
+        <h3 class="fw-bold text-dark mb-1">Issue Official Placement Offer Letter</h3>
+        <p class="text-muted small mb-0">Record formal compensation CTC and job details for selected candidate.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white fw-bold">
+                    <i class="bi bi-award-fill text-warning me-2"></i> Placement Offer Details
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-light border mb-4">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <strong>Candidate:</strong> <span th:text="${application.student.user.fullName}">Name</span> (<span th:text="${application.student.usn}">USN</span>)
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>Company:</strong> <span th:text="${application.drive.company.name}">Company</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/officer/offers/issue}" th:object="${offerDto}" method="post">
+                        <input type="hidden" th:field="*{applicationId}">
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Job Designation *</label>
+                                <input type="text" class="form-control" th:field="*{designation}" placeholder="e.g. Software Engineer" required>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('designation')}" th:errors="*{designation}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Offered Package / CTC (LPA) *</label>
+                                <input type="number" step="0.01" class="form-control" th:field="*{packageOffered}" placeholder="e.g. 14.5" required>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('packageOffered')}" th:errors="*{packageOffered}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Offer Issue Date *</label>
+                                <input type="date" class="form-control" th:field="*{offerDate}" required>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('offerDate')}" th:errors="*{offerDate}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Expected Joining Date</label>
+                                <input type="date" class="form-control" th:field="*{joiningDate}">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold">Offer Terms / Compensation Breakdown</label>
+                            <textarea class="form-control" th:field="*{offerDetails}" rows="3" placeholder="Base pay, retention bonus, joining perks, or performance incentives..."></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/officer/applications}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4 fw-medium">
+                                <i class="bi bi-check2-circle me-1"></i> Issue Official Offer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

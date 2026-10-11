@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title>Interview Management - College Placement System</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Recruitment Interview Management</h3>
+            <p class="text-muted small mb-0">Schedule rounds, distribute meeting links, record recruiter feedback, and track statuses.</p>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#scheduleModal">
+            <i class="bi bi-calendar-plus me-1"></i> Schedule Interview Round
+        </button>
+    </div>
+
+    <!-- Pre-selected Candidate Alert if navigated from Application list -->
+    <div th:if="${selectedApp != null}" class="alert alert-info d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <strong>Scheduling for:</strong>
+            <span th:text="${selectedApp.student.user.fullName + ' (' + selectedApp.student.usn + ') - ' + selectedApp.drive.company.name + ' (' + selectedApp.drive.title + ')'}">Candidate</span>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#scheduleModal">Open Form</button>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 searchable-table">
+                <thead>
+                    <tr>
+                        <th>Candidate</th>
+                        <th>Company & Role</th>
+                        <th>Round Name</th>
+                        <th>Date & Time</th>
+                        <th>Mode</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="inv : ${interviews}">
+                        <td>
+                            <div class="fw-bold" th:text="${inv.application.student.user.fullName}">Student Name</div>
+                            <small class="text-muted" th:text="${inv.application.student.usn + ' (' + inv.application.student.branch + ')'}">1CS21CS045</small>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark" th:text="${inv.application.drive.company.name}">Microsoft</div>
+                            <small class="text-muted" th:text="${inv.application.drive.title}">SDE-1</small>
+                        </td>
+                        <td class="fw-semibold text-primary" th:text="${inv.roundName}">Round 1 - Technical</td>
+                        <td class="small" th:text="${#temporals.format(inv.interviewDate, 'dd MMM yyyy, hh:mm a')}">Date</td>
+                        <td><span class="badge bg-light text-dark border" th:text="${inv.mode.displayName}">Online</span></td>
+                        <td>
+                            <span class="badge" th:classappend="'bg-' + ${inv.status.badgeClass}" th:text="${inv.status.displayName}">Scheduled</span>
+                        </td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-outline-secondary btn-sm"
+                                    th:onclick="'openUpdateInterviewModal(' + ${inv.id} + ', \'' + ${inv.status} + '\', \'' + ${#strings.escapeJavaScript(inv.feedback != null ? inv.feedback : '')} + '\')'">
+                                Update Result
+                            </button>
+                        </td>
+                    </tr>
+                    <tr th:if="${interviews == null || interviews.isEmpty()}">
+                        <td colspan="7" class="text-center text-muted py-4">No interviews scheduled yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Schedule Interview Modal -->
+    <div class="modal fade" id="scheduleModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form th:action="@{/officer/interviews/schedule}" th:object="${scheduleDto}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Schedule Recruitment Interview Round</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Application ID *</label>
+                                <input type="number" class="form-control" th:field="*{applicationId}" placeholder="Enter Application ID" required>
+                                <small class="text-muted">Enter target candidate application ID (found in Manage Applications table).</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Interview Round Name *</label>
+                                <input type="text" class="form-control" th:field="*{roundName}" placeholder="e.g. Round 1 - Technical Coding" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Date & Time *</label>
+                                <input type="datetime-local" class="form-control" th:field="*{interviewDate}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Interview Mode *</label>
+                                <select class="form-select" th:field="*{mode}" required>
+                                    <option th:each="m : ${modes}" th:value="${m}" th:text="${m.displayName}">Online</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold">Meeting Link (Virtual) or On-Campus Venue *</label>
+                                <input type="text" class="form-control" th:field="*{meetingLinkOrVenue}" placeholder="https://teams.microsoft.com/... or Campus Seminar Hall A" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold">Instructions for Candidate</label>
+                                <textarea class="form-control" th:field="*{instructions}" rows="3" placeholder="Preparation instructions, documents to bring, ID proof requirements..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm fw-semibold">Schedule Interview</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Interview Result Modal -->
+    <div class="modal fade" id="updateInterviewModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="updateInterviewForm" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Update Interview Result & Feedback</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Interview Status *</label>
+                            <select class="form-select" name="status" id="interviewModalStatus" required>
+                                <option value="SCHEDULED">Scheduled</option>
+                                <option value="COMPLETED">Completed</option>
+                                <option value="RESCHEDULED">Rescheduled</option>
+                                <option value="CANCELLED">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Interviewer / Recruiter Feedback</label>
+                            <textarea class="form-control" name="feedback" id="interviewModalFeedback" rows="3" placeholder="Performance evaluation, remarks, score, or recommendations..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm fw-semibold">Save Feedback</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openUpdateInterviewModal(invId, currentStatus, feedback) {
+            document.getElementById('updateInterviewForm').action = '/officer/interviews/' + invId + '/update';
+            document.getElementById('interviewModalStatus').value = currentStatus;
+            document.getElementById('interviewModalFeedback').value = feedback;
+            const modal = new bootstrap.Modal(document.getElementById('updateInterviewModal'));
+            modal.show();
+        }
+    </script>
+
+</div>
+</body>
+</html>

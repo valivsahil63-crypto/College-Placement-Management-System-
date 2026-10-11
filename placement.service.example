@@ -1,0 +1,26 @@
+[Unit]
+Description=College Placement Management System
+After=syslog.target network.target mysql.service
+
+[Service]
+Type=simple
+User=placement
+Group=placement
+WorkingDirectory=/opt/placement-system
+ExecStart=/usr/bin/java -Xms512m -Xmx1024m -jar /opt/placement-system/placement-management-system-1.0.0.jar
+Environment="SPRING_PROFILES_ACTIVE=mysql"
+Environment="DB_HOST=localhost"
+Environment="DB_PORT=3306"
+Environment="DB_NAME=placement_db"
+Environment="DB_USER=root"
+Environment="DB_PASSWORD=YourSecurePassword"
+Environment="SERVER_PORT=8080"
+Environment="APP_UPLOAD_DIR=/opt/placement-system/uploads/resumes"
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=placement-system
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title>My Interviews - College Placement System</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="mb-4">
+        <h3 class="fw-bold text-dark mb-1">My Interview Schedules</h3>
+        <p class="text-muted small mb-0">Review upcoming recruitment rounds, online meeting links, campus venues, and recruiter instructions.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6" th:each="inv : ${interviews}">
+            <div class="card shadow-sm border h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span class="badge" th:classappend="'bg-' + ${inv.status.badgeClass}" th:text="${inv.status.displayName}">Scheduled</span>
+                    <span class="badge bg-light text-dark border" th:text="${inv.mode.displayName}">Online</span>
+                </div>
+                <div class="card-body p-4 d-flex flex-column">
+                    <h5 class="fw-bold text-dark mb-1" th:text="${inv.application.drive.company.name}">Microsoft IDC</h5>
+                    <h6 class="text-primary fw-semibold mb-3" th:text="${inv.roundName}">Round 1 - Technical Coding</h6>
+
+                    <div class="bg-light p-3 rounded small mb-3">
+                        <div class="mb-2">
+                            <i class="bi bi-clock-fill text-primary me-2"></i>
+                            <strong>Scheduled Time:</strong> <span th:text="${#temporals.format(inv.interviewDate, 'EEEE, dd MMMM yyyy, hh:mm a')}">Date</span>
+                        </div>
+                        <div class="mb-0">
+                            <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                            <strong>Venue / Meeting Link:</strong>
+                            <div class="text-truncate mt-1">
+                                <a th:if="${inv.meetingLinkOrVenue.startsWith('http')}" th:href="${inv.meetingLinkOrVenue}" target="_blank" class="fw-semibold" th:text="${inv.meetingLinkOrVenue}">Link</a>
+                                <span th:unless="${inv.meetingLinkOrVenue.startsWith('http')}" class="fw-semibold" th:text="${inv.meetingLinkOrVenue}">Venue</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${inv.instructions != null && !inv.instructions.isBlank()}" class="mb-3">
+                        <strong class="small text-muted d-block mb-1">Instructions from Recruiter:</strong>
+                        <p class="small text-secondary mb-0" th:text="${inv.instructions}">Instructions</p>
+                    </div>
+
+                    <div th:if="${inv.feedback != null && !inv.feedback.isBlank()}" class="mt-auto pt-2 border-top">
+                        <strong class="small text-muted d-block mb-1">Recruiter Feedback:</strong>
+                        <p class="small text-success mb-0" th:text="${inv.feedback}">Feedback</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 text-center text-muted py-5" th:if="${interviews == null || interviews.isEmpty()}">
+            <i class="bi bi-calendar2-x fs-1 text-secondary d-block mb-2"></i>
+            <h5>No interviews currently scheduled</h5>
+            <p class="small">When your application progresses to the interview stage, details and meeting links will appear here.</p>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

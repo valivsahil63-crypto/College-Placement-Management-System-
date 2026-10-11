@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title>Placement Offers - College Placement System</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Campus Placement Offers Issued</h3>
+            <p class="text-muted small mb-0">Record of compensation packages, offer acceptances, designations, and corporate hires.</p>
+        </div>
+        <a th:href="@{/reports/export/placed}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-download me-1"></i> Export Placed Students (CSV)
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>USN</th>
+                        <th>Student Name</th>
+                        <th>Recruiting Company</th>
+                        <th>Designation</th>
+                        <th>Offered Package (CTC)</th>
+                        <th>Offer Date</th>
+                        <th>Student Response</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="offer : ${offers}">
+                        <td class="fw-bold" th:text="${offer.student.usn}">1CS21CS089</td>
+                        <td>
+                            <div class="fw-semibold text-dark" th:text="${offer.student.user.fullName}">Sneha Rao</div>
+                            <small class="text-muted" th:text="${offer.student.branch}">CSE</small>
+                        </td>
+                        <td class="fw-bold text-dark" th:text="${offer.company.name}">Google India</td>
+                        <td th:text="${offer.designation}">SDE-1</td>
+                        <td>
+                            <span class="badge bg-success-subtle text-success fs-6" th:text="${offer.packageOffered + ' LPA'}">32.5 LPA</span>
+                        </td>
+                        <td class="small text-muted" th:text="${offer.offerDate}">2026-10-10</td>
+                        <td>
+                            <span class="badge" th:classappend="'bg-' + ${offer.status.badgeClass}" th:text="${offer.status.displayName}">Accepted</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${offers == null || offers.isEmpty()}">
+                        <td colspan="7" class="text-center text-muted py-4">No placement offers recorded yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

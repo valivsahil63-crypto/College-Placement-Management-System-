@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms and Conditions - College Placement Management System</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" th:href="@{/}">
+                <i class="bi bi-mortarboard-fill text-primary fs-4"></i>
+                <span>College Placement Portal</span>
+            </a>
+            <div class="ms-auto d-flex gap-2">
+                <a th:href="@{/}" class="btn btn-outline-light btn-sm">Home</a>
+                <a th:href="@{/login}" class="btn btn-primary btn-sm">Sign In</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <div class="container py-5" style="max-width: 860px;">
+        <div class="card shadow-sm border-0 rounded-3 p-4 p-md-5 bg-white">
+            <h2 class="fw-bold text-dark mb-2">Terms and Conditions</h2>
+            <p class="text-muted small border-bottom pb-3 mb-4">Effective: Academic Session 2024-2026 | Training and Placement Cell</p>
+
+            <h5 class="fw-bold text-primary mb-2">1. Acceptance of Terms</h5>
+            <p class="text-secondary small mb-4">
+                By registering on and utilizing the College Placement Management System, students and campus recruiters agree to abide by the institutional recruitment guidelines established by the College Placement Board.
+            </p>
+
+            <h5 class="fw-bold text-primary mb-2">2. Candidate Eligibility and Academic Integrity</h5>
+            <p class="text-secondary small mb-2">All student participants are subject to the following statutory obligations:</p>
+            <ul class="text-secondary small mb-4">
+                <li>Students must ensure that all entered academic records, including CGPA, 10th and 12th standard percentage marks, and active backlog counts, are accurate and verifiable against official college registrar transcripts.</li>
+                <li>Falsification of academic scores or resume information will lead to immediate deactivation from the placement portal and referral to the academic disciplinary committee.</li>
+                <li>The system's automated eligibility engine strictly enforces corporate hiring criteria. Students who do not meet defined cutoffs are disqualified from application submission.</li>
+            </ul>
+
+            <h5 class="fw-bold text-primary mb-2">3. Application and Interview Protocol</h5>
+            <ul class="text-secondary small mb-4">
+                <li>Application submission is subject to the published deadline for each drive. Late submissions cannot be accepted.</li>
+                <li>Once an application is shortlisted or an interview round has been scheduled, candidate withdrawal is strictly disallowed to respect corporate commitments.</li>
+                <li>Candidates are expected to maintain professional conduct during virtual and in-person interviews and adhere to stated joining timelines.</li>
+            </ul>
+
+            <h5 class="fw-bold text-primary mb-2">4. Placement Policy ("One Offer" Guideline)</h5>
+            <p class="text-secondary small mb-4">
+                In accordance with institutional placement policies, students who accept a formal recruitment offer are designated as Placed. Further participation in subsequent placement drives is governed by tiered package threshold regulations defined by the Dean of Training and Placements.
+            </p>
+
+            <h5 class="fw-bold text-primary mb-2">5. System Availability and Technical Specifications</h5>
+            <p class="text-secondary small mb-0">
+                The college makes no warranty regarding uninterrupted portal availability. Scheduled system maintenance will be broadcast via portal announcements in advance.
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center small text-secondary">
+            <p class="mb-1">&copy; 2026 College Placement Management System. All rights reserved.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a th:href="@{/privacy-policy}" class="text-secondary text-decoration-none">Privacy Policy</a>
+                <span>|</span>
+                <a th:href="@{/terms-and-conditions}" class="text-secondary text-decoration-none">Terms and Conditions</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

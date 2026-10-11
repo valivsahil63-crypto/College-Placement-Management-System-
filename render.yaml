@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: college-placement-system
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /login
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: mysql
+      - key: DB_HOST
+        fromDatabase:
+          name: placement-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: placement-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: placement-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: placement-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: placement-db
+          property: password
+      - key: SERVER_PORT
+        value: 8080
+      - key: APP_UPLOAD_DIR
+        value: /tmp/uploads
+
+databases:
+  - name: placement-db
+    databaseName: placement_db
+    user: placement_user
+    plan: free
+    region: oregon

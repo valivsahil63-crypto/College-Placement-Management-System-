@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main-layout(~{::title}, ~{::#content})}">
+<head>
+    <title th:text="${student.user.fullName + ' - Profile'}">Student Profile</title>
+</head>
+<body>
+<div id="content">
+
+    <div class="mb-4">
+        <a th:href="@{/admin/students}" class="btn btn-outline-secondary btn-sm mb-2"><i class="bi bi-arrow-left"></i> Back to Student Database</a>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="fw-bold text-dark mb-0" th:text="${student.user.fullName}">Student Name</h3>
+                <span class="text-muted" th:text="${student.usn + ' | ' + student.user.username}">1CS21CS045 | email@college.edu</span>
+            </div>
+            <div>
+                <span th:if="${student.placed}" class="badge bg-success fs-6 px-3 py-2">Placed Student</span>
+                <span th:unless="${student.placed}" class="badge bg-secondary fs-6 px-3 py-2">Unplaced</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body text-center p-4">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle p-4 mb-3">
+                        <i class="bi bi-person-badge fs-1"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1" th:text="${student.user.fullName}">Name</h5>
+                    <p class="text-muted small mb-3" th:text="${student.branch + ' Department'}">CSE Department</p>
+
+                    <div class="d-grid gap-2">
+                        <a th:if="${student.resumePath != null}" th:href="@{'/uploads/resume/' + ${student.resumePath}}" target="_blank" class="btn btn-primary btn-sm">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> View Resume PDF
+                        </a>
+                        <button th:unless="${student.resumePath != null}" class="btn btn-secondary btn-sm" disabled>
+                            <i class="bi bi-file-earmark-x me-1"></i> No Resume Uploaded
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header fw-bold">Contact & Social Links</div>
+                <div class="card-body p-3 small">
+                    <p class="mb-2"><strong>Phone:</strong> <span th:text="${student.phone}">+91 9876543210</span></p>
+                    <p class="mb-2"><strong>Gender:</strong> <span th:text="${student.gender != null ? student.gender : 'Not specified'}">Male</span></p>
+                    <p class="mb-2"><strong>Address:</strong> <span th:text="${student.address != null ? student.address : 'N/A'}">Address</span></p>
+                    <p class="mb-2" th:if="${student.linkedinUrl != null && !student.linkedinUrl.isBlank()}">
+                        <strong>LinkedIn:</strong> <a th:href="${student.linkedinUrl}" target="_blank" class="text-truncate d-inline-block" style="max-width: 180px;" th:text="${student.linkedinUrl}">Link</a>
+                    </p>
+                    <p class="mb-0" th:if="${student.githubUrl != null && !student.githubUrl.isBlank()}">
+                        <strong>GitHub:</strong> <a th:href="${student.githubUrl}" target="_blank" class="text-truncate d-inline-block" style="max-width: 180px;" th:text="${student.githubUrl}">Link</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header fw-bold">Academic Performance & Eligibility Credentials</div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="bg-light p-3 rounded text-center">
+                                <span class="text-muted small text-uppercase fw-semibold">CGPA</span>
+                                <h3 class="fw-bold text-primary mb-0" th:text="${student.cgpa}">8.85</h3>
+                                <small class="text-muted">Scale of 10.0</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="bg-light p-3 rounded text-center">
+                                <span class="text-muted small text-uppercase fw-semibold">10th Grade</span>
+                                <h3 class="fw-bold text-dark mb-0" th:text="${student.tenthPercentage + '%'}">92%</h3>
+                                <small class="text-muted">Secondary School</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="bg-light p-3 rounded text-center">
+                                <span class="text-muted small text-uppercase fw-semibold">12th Grade</span>
+                                <h3 class="fw-bold text-dark mb-0" th:text="${student.twelfthPercentage + '%'}">89%</h3>
+                                <small class="text-muted">Higher Secondary</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="bg-light p-3 rounded text-center">
+                                <span class="text-muted small text-uppercase fw-semibold">Backlogs</span>
+                                <h3 class="fw-bold mb-0" th:classappend="${student.activeBacklogs == 0} ? 'text-success' : 'text-danger'" th:text="${student.activeBacklogs}">0</h3>
+                                <small class="text-muted">Active papers</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h6 class="fw-bold mb-2">Technical Skills</h6>
+                    <p class="text-muted" th:text="${student.skills != null && !student.skills.isBlank() ? student.skills : 'No skills recorded'}">Java, Spring Boot, MySQL</p>
+
+                    <h6 class="fw-bold mb-2">Graduation Batch</h6>
+                    <p class="text-muted mb-0" th:text="${'Class of ' + student.graduationYear}">Class of 2025</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
